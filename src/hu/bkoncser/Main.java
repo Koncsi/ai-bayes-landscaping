@@ -1,6 +1,7 @@
 package hu.bkoncser;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.linear.BlockRealMatrix;
 
 /**
  * Created by bkoncser on 2016-10-26.
@@ -9,13 +10,12 @@ public class Main {
 
     public static void main(String[] args){
 
+        MyMatrix myMatrix = new MyMatrix();
 
-        NormalDistribution nb = new NormalDistribution();
+        myMatrix.parseInputToMatrix();
 
+        myMatrix.printMatrix();
 
-
-
-        System.out.println("working...  " + nb.probability(5.0f));
     }
 
 }
