@@ -12,7 +12,13 @@ public class Main {
 
         MyMatrix myMatrix = new MyMatrix();
 
-        myMatrix.parseInputToMatrix();
+        int L = myMatrix.parseInputToMatrix();
+        int I = myMatrix.getRowDimension();
+        int J = myMatrix.getColumnDimension();
+
+
+        MyMatrix U = new MyMatrix(I, L);
+        //TODO
 
         myMatrix.printMatrix();
 

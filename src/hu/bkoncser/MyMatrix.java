@@ -19,7 +19,16 @@ public class MyMatrix {
         paramBeta = null;
     }
 
-    void parseInputToMatrix(){
+    public MyMatrix(BlockRealMatrix mtx) {
+        matrix = mtx;
+        paramBeta = 0.0;
+    }
+
+    public MyMatrix(int i, int l) {
+        matrix = new BlockRealMatrix(i,l);
+    }
+
+    int parseInputToMatrix(){
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String[] inputParameters;
@@ -43,8 +52,13 @@ public class MyMatrix {
             matrix = new BlockRealMatrix(values);
             paramBeta = Double.parseDouble(inputParameters[3]);
 
+            return Integer.parseInt(inputParameters[2]);
+
         }catch (Exception e){
             e.printStackTrace();
+        }
+        finally {
+            return 0;
         }
     }
 
@@ -58,6 +72,14 @@ public class MyMatrix {
             System.out.println();
         }
 
+    }
+
+    MyMatrix multiply(MyMatrix other){
+        return new MyMatrix(this.matrix.multiply(other.getMatrix()));
+    }
+
+    BlockRealMatrix getMatrix(){
+        return  matrix;
     }
 
     int getRowDimension(){
