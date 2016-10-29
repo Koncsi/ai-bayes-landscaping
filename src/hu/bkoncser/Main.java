@@ -3,6 +3,8 @@ package hu.bkoncser;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.BlockRealMatrix;
 
+import java.util.ArrayList;
+
 import static javafx.scene.input.KeyCode.H;
 
 /**
@@ -23,25 +25,54 @@ public class Main {
         U.setParamAlpha(1.0);
         U.generate();
 
+
         MyMatrix V = new MyMatrix(L,J);
         V.setParamAlpha(1.0);
         V.generate();
 
 
-        //for(int i = 0; i<100; i++) {
+
+
+        ArrayList<MyMatrix> resultsU = new ArrayList<>();
+        ArrayList<MyMatrix> resultsV = new ArrayList<>();
+        for(int i = 0; i<100; i++) {
            // System.out.println(i);
             U.refresh(V, H, true);
             V.refresh(U, H, false);
-        //}
+            if(i > 30){
+                resultsU.add(U);
+                resultsV.add(V);
+            }
+        }
+
+        double[][] uResult = new double[U.getRowDimension()][U.getColumnDimension()];
+        for(int i = 0; i < U.getRowDimension(); i++){
+            for(int j = 0; j < U.getColumnDimension(); j++){
+                double val = 0.0;
+                for(int k = 0; k < resultsU.size(); k++)
+                    val += resultsU.get(k).getMatrix().getData()[i][j];
+                uResult[i][j] = val/resultsU.size();
+            }
+        }
+
+        double[][] vResult = new double[V.getRowDimension()][V.getColumnDimension()];
+        for(int i = 0; i < V.getRowDimension(); i++){
+            for(int j = 0; j < V.getColumnDimension(); j++){
+                double val = 0.0;
+                for(int k = 0; k < resultsV.size(); k++)
+                    val += resultsV.get(k).getMatrix().getData()[i][j];
+                vResult[i][j] = val/resultsV.size();
+            }
+        }
 
 
-        BlockRealMatrix Hopt = U.getMatrix().transpose();
-       // new MyMatrix(Hopt).printMatrix();
-        System.out.println("---------------------");
-        Hopt = Hopt.multiply(V.getMatrix());
+        /*BlockRealMatrix hopt = new BlockRealMatrix(uResult).transpose();
+        hopt = hopt.multiply(new BlockRealMatrix(vResult));
+        new MyMatrix(hopt).printMatrix();*/
 
-        new MyMatrix(Hopt).printMatrix();
-
+        new MyMatrix(new BlockRealMatrix(uResult)).printMatrix();
+        System.out.println();
+        new MyMatrix(new BlockRealMatrix(vResult)).printMatrix();
     }
 
 }

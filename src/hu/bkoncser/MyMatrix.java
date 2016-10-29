@@ -81,7 +81,10 @@ public class MyMatrix {
         double [][] values = matrix.getData();
         for(int i = 0; i< matrix.getRowDimension(); i++){
             for(int j =0; j<matrix.getColumnDimension(); j++){
-                System.out.print(values[i][j] + ",");
+                if(j == matrix.getColumnDimension()-1)
+                    System.out.print(values[i][j]);
+                else
+                    System.out.print(values[i][j] + ",");
             }
             System.out.println();
         }
@@ -132,7 +135,7 @@ public class MyMatrix {
             nulls[i] = 0.0;
 
 
-        MultivariateNormalDistribution normalDist = new MultivariateNormalDistribution(nulls, I.scalarMulri(1.0/this.getParamAlpha()).getDoubles());
+        MultivariateNormalDistribution normalDist = new MultivariateNormalDistribution(nulls, I.scalarMulri(this.getParamAlpha()).getDoubles());
 
         for(int i = 0; i < matrix.getColumnDimension(); i++)
             matrix.setColumn(i, normalDist.sample());
@@ -168,7 +171,7 @@ public class MyMatrix {
             resultMtx = (BlockRealMatrix) resultMtx.scalarMultiply(hij);
             for (int i = 1; i < uv.getColumnDimension(); i++) {
                 hij = h.getMatrix().getRow(index)[i];
-                BlockRealMatrix temp = uv.getMatrix().getColumnMatrix(0);
+                BlockRealMatrix temp = uv.getMatrix().getColumnMatrix(i);
                 resultMtx = resultMtx.add(temp.scalarMultiply(hij));
             }
         }
@@ -179,7 +182,7 @@ public class MyMatrix {
             resultMtx = (BlockRealMatrix) resultMtx.scalarMultiply(hij);
             for (int i = 1; i < uv.getColumnDimension(); i++) {
                 hij = h.getMatrix().getRow(i)[index];
-                BlockRealMatrix temp = uv.getMatrix().getColumnMatrix(0);
+                BlockRealMatrix temp = uv.getMatrix().getColumnMatrix(i);
                 resultMtx = resultMtx.add(temp.scalarMultiply(hij));
             }
         }
