@@ -7,7 +7,6 @@ import org.apache.commons.math3.linear.RealMatrix;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 /**
  * Created by Koncsi on 26/10/2016.
@@ -17,31 +16,32 @@ public class MyMatrix {
     private BlockRealMatrix matrix;
 
     private Double paramBeta;
-
-
     private Double paramAlpha;
 
     public MyMatrix(){
         matrix = null;
-        paramBeta = null;
     }
 
     public MyMatrix(BlockRealMatrix mtx) {
         matrix = mtx;
-        paramBeta = 0.0;
     }
 
-    public MyMatrix(int i, int l) {
-        double[][] identity = new double[i][l];
-        for(int a = 0; a < i; a++){
-            for (int b = 0; b < l; b++){
-                if(b==a)
-                    identity[a][b] = 1.0;
-                else
-                    identity[a][b] = 0.0;
+    public MyMatrix(int i, int l, boolean isIdentity) {
+        if(isIdentity){
+            double[][] identity = new double[i][l];
+            for(int a = 0; a < i; a++){
+                for (int b = 0; b < l; b++){
+                    if(b==a)
+                        identity[a][b] = 1.0;
+                    else
+                        identity[a][b] = 0.0;
+                }
             }
+            matrix = new BlockRealMatrix(identity);
         }
-        matrix = new BlockRealMatrix(identity);
+        else{
+            matrix = new BlockRealMatrix(new double[i][l]);
+        }
     }
 
     int parseInputToMatrix(){
@@ -77,7 +77,6 @@ public class MyMatrix {
     }
 
     void printMatrix(){
-
         double [][] values = matrix.getData();
         for(int i = 0; i< matrix.getRowDimension(); i++){
             for(int j =0; j<matrix.getColumnDimension(); j++){
@@ -88,15 +87,6 @@ public class MyMatrix {
             }
             System.out.println();
         }
-
-    }
-
-    MyMatrix multiply(MyMatrix other){
-        return new MyMatrix(this.matrix.multiply(other.getMatrix()));
-    }
-
-    MyMatrix scalarMulri(double d){
-        return new MyMatrix((BlockRealMatrix) this.matrix.scalarMultiply(d));
     }
 
     BlockRealMatrix getMatrix(){
@@ -128,14 +118,11 @@ public class MyMatrix {
     }
 
     public void generate() {
-        MyMatrix I = new MyMatrix(this.getRowDimension(), this.getRowDimension());
+        BlockRealMatrix I = new MyMatrix(this.getRowDimension(), this.getRowDimension(), true).getMatrix();
 
         double[] nulls = new double[I.getRowDimension()];
-        for(int i = 0; i < I.getRowDimension();i++)
-            nulls[i] = 0.0;
 
-
-        MultivariateNormalDistribution normalDist = new MultivariateNormalDistribution(nulls, I.scalarMulri(this.getParamAlpha()).getDoubles());
+        MultivariateNormalDistribution normalDist = new MultivariateNormalDistribution(nulls, I.scalarMultiply(this.getParamAlpha()).getData());
 
         for(int i = 0; i < matrix.getColumnDimension(); i++)
             matrix.setColumn(i, normalDist.sample());
@@ -144,8 +131,8 @@ public class MyMatrix {
 
     public void refresh(MyMatrix uv, MyMatrix h, boolean forU) {
         MultivariateNormalDistribution normalDist;
+        MyMatrix labda = calculateLabda(h.getParamBeta(),uv);
         for(int index = 0; index < this.getColumnDimension(); index++){
-            MyMatrix labda = calculateLabda(h.getParamBeta(),uv);
             double[] pszi = calculatePszi(labda,h,uv,index,forU);
             normalDist = new MultivariateNormalDistribution(pszi,invert(labda).getData());
             matrix.setColumn(index, normalDist.sample());
@@ -161,7 +148,6 @@ public class MyMatrix {
 
         BlockRealMatrix mtx = invert(labda);
 
-        mtx.scalarMultiply(h.getParamBeta());
         double hij;
         BlockRealMatrix resultMtx;
         if(forU) {
@@ -186,13 +172,13 @@ public class MyMatrix {
                 resultMtx = resultMtx.add(temp.scalarMultiply(hij));
             }
         }
-        double[] ret = mtx.preMultiply(resultMtx.getColumn(0));
+        resultMtx = (BlockRealMatrix) resultMtx.scalarMultiply(h.getParamBeta());
 
-        return ret;
+        return mtx.preMultiply(resultMtx.getColumn(0));
     }
 
     private MyMatrix calculateLabda(Double paramBeta, MyMatrix uv) {
-        BlockRealMatrix I = new MyMatrix(uv.getRowDimension(),uv.getRowDimension()).getMatrix();
+        BlockRealMatrix I = new MyMatrix(uv.getRowDimension(),uv.getRowDimension(),true).getMatrix();
 
         BlockRealMatrix column = uv.getMatrix().getColumnMatrix(0);
         BlockRealMatrix mtx = column.multiply(column.transpose());
@@ -203,7 +189,7 @@ public class MyMatrix {
             mtx = mtx.add(tempMtx);
         }
         mtx = (BlockRealMatrix) mtx.scalarMultiply(paramBeta);
-        mtx = mtx.add(I.scalarMultiply(this.getParamAlpha()));
+        mtx = mtx.add(I.scalarMultiply(1/this.getParamAlpha()));
         return new MyMatrix(mtx);
     }
 }

@@ -1,11 +1,7 @@
 package hu.bkoncser;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.BlockRealMatrix;
-
 import java.util.ArrayList;
-
-import static javafx.scene.input.KeyCode.H;
 
 /**
  * Created by bkoncser on 2016-10-26.
@@ -14,29 +10,24 @@ public class Main {
 
     public static void main(String[] args){
 
+
         MyMatrix H = new MyMatrix();
 
         int L = H.parseInputToMatrix();
         int I = H.getRowDimension();
         int J = H.getColumnDimension();
-        H.printMatrix();
 
-        MyMatrix U = new MyMatrix(L, I);
+        MyMatrix U = new MyMatrix(L, I,false);
         U.setParamAlpha(1.0);
         U.generate();
 
-
-        MyMatrix V = new MyMatrix(L,J);
+        MyMatrix V = new MyMatrix(L,J,false);
         V.setParamAlpha(1.0);
         V.generate();
 
-
-
-
         ArrayList<MyMatrix> resultsU = new ArrayList<>();
         ArrayList<MyMatrix> resultsV = new ArrayList<>();
-        for(int i = 0; i<100; i++) {
-           // System.out.println(i);
+        for(int i = 0; i<120; i++) {
             U.refresh(V, H, true);
             V.refresh(U, H, false);
             if(i > 30){
@@ -65,14 +56,9 @@ public class Main {
             }
         }
 
-
-        /*BlockRealMatrix hopt = new BlockRealMatrix(uResult).transpose();
-        hopt = hopt.multiply(new BlockRealMatrix(vResult));
-        new MyMatrix(hopt).printMatrix();*/
-
-        new MyMatrix(new BlockRealMatrix(uResult)).printMatrix();
+        new MyMatrix(new BlockRealMatrix(uResult).transpose()).printMatrix();
         System.out.println();
-        new MyMatrix(new BlockRealMatrix(vResult)).printMatrix();
+        new MyMatrix(new BlockRealMatrix(vResult).transpose()).printMatrix();
     }
 
 }
